@@ -398,7 +398,7 @@ class SpotifyClient(object):
         Make a request to the Spotify authorization endpoint to obtain the access and refresh tokens for a user after
         they have granted our application permission to Spotify on their behalf.
 
-        :param code: (str) Authorization code returned from initial request to SPOTIFY['user_auth_url']
+        :param code: (str) Authorization code returned from initial request for Spotify OAuth
         :param redirect_url: (str) URL to redirect to after OAuth confirmation
 
         :return: (dict)
