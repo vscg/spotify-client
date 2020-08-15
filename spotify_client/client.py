@@ -3,6 +3,7 @@ import json
 import logging
 import random
 from base64 import b64encode
+from typing import List, Union
 from urllib.parse import urlencode
 
 import requests
@@ -31,7 +32,7 @@ class SpotifyClient(object):
         self.auth_token = None
         self.seen_songs = []
 
-    def _sanitize_log_data(self, data):
+    def _sanitize_log_data(self, data: dict) -> dict:
         """
         Redact sensitive data (auth headers, access tokens, etc.) from logging data and
         replace with a sanitized value.
@@ -46,7 +47,7 @@ class SpotifyClient(object):
 
         return data
 
-    def _log(self, level, msg, extra=None, exc_info=False):
+    def _log(self, level: int, msg: str, extra: dict = None, exc_info: bool = False) -> None:
         """
         Log a message to the logger at a given level with optional extra info or traceback info.
 
@@ -72,7 +73,14 @@ class SpotifyClient(object):
 
         logger.log(level, msg, extra=extra, exc_info=exc_info)
 
-    def _make_spotify_request(self, method, url, params=None, data=None, headers=None):
+    def _make_spotify_request(
+            self,
+            method: str,
+            url: str,
+            params: dict = None,
+            data: Union[dict, str] = None,
+            headers: dict = None
+    ) -> dict:
         """
         Make a request to the Spotify API and return the JSON response
 
@@ -156,7 +164,7 @@ class SpotifyClient(object):
 
             raise ClientException('Received unhandled exception requesting {}'.format(url))
 
-    def _get_auth_access_token(self):
+    def _get_auth_access_token(self) -> str:
         """
         Return the access token we need to make requests to Spotify. Will either hit the cache for the key,
         or make a request to Spotify if the token in the cache is invalid
@@ -176,7 +184,7 @@ class SpotifyClient(object):
 
         return self.auth_token
 
-    def _make_authorization_header(self):
+    def _make_authorization_header(self) -> dict:
         """
         Build the Basic Authorization header used for Spotify API authentication
 
@@ -188,7 +196,7 @@ class SpotifyClient(object):
 
         return {'Authorization': 'Basic {}'.format(auth_header.decode('utf8'))}
 
-    def _make_auth_access_token_request(self):
+    def _make_auth_access_token_request(self) -> str:
         """
         Get an access token from Spotify for authentication
 
@@ -207,7 +215,7 @@ class SpotifyClient(object):
 
         return resp.get('access_token')
 
-    def get_code_from_spotify_uri(self, code):
+    def get_code_from_spotify_uri(self, code: str) -> str:
         """
         Get the Spotify code (alphanumeric value) from the Spotify song URI. Used in requests to Spotify
         for a track, as Spotify only cares about the alphanumeric value.
@@ -220,7 +228,7 @@ class SpotifyClient(object):
         """
         return code.split(':')[2]
 
-    def batch_tracks(self, tracks, batch_size=None):
+    def batch_tracks(self, tracks: list, batch_size: int = None) -> List[list]:
         """
         Some Spotify endpoints have a limit on the number of tracks to send in one request. This method will
         take a list of tracks and create a list of batches for including in Spotify requests.
@@ -234,7 +242,7 @@ class SpotifyClient(object):
 
         return [tracks[idx:idx + batch_size] for idx in range(0, len(tracks), batch_size)]
 
-    def get_playlists_for_category(self, category, num_playlists):
+    def get_playlists_for_category(self, category: str, num_playlists: int) -> List[dict]:
         """
         Get a number of playlists from Spotify for a given category
 
@@ -273,7 +281,7 @@ class SpotifyClient(object):
 
         return retrieved_playlists
 
-    def get_songs_from_playlist(self, playlist, num_songs):
+    def get_songs_from_playlist(self, playlist: dict, num_songs: int) -> List[dict]:
         """
         Get a number of songs randomly from the given playlist.
         List of songs is shuffled and the number of desired tracks are returned.
@@ -333,7 +341,7 @@ class SpotifyClient(object):
 
         return retrieved_tracks
 
-    def get_audio_features_for_tracks(self, tracks):
+    def get_audio_features_for_tracks(self, tracks: List[dict]) -> List[dict]:
         """
         Get audio features (attributes we use for determining song emotion) for a number of tracks. Will update the
         tracks in place, each track in the list is a dictionary of values needed to create a Song object. This method
@@ -376,7 +384,7 @@ class SpotifyClient(object):
 
         return tracks
 
-    def build_spotify_oauth_confirm_link(self, state, scopes, redirect_url):
+    def build_spotify_oauth_confirm_link(self, state: str, scopes: List[str], redirect_url: str) -> str:
         """
         First step in the Spotify user authorization flow. This builds the request to authorize the application with
         Spotify. Note that this function simply builds the URL for the user to visit, the actual behavior for the
@@ -398,7 +406,7 @@ class SpotifyClient(object):
 
         return '{url}?{params}'.format(url=self.USER_AUTH_URL, params=urlencode(params))
 
-    def get_access_and_refresh_tokens(self, code, redirect_url):
+    def get_access_and_refresh_tokens(self, code: str, redirect_url: str) -> dict:
         """
         Make a request to the Spotify authorization endpoint to obtain the access and refresh tokens for a user after
         they have granted our application permission to Spotify on their behalf.
@@ -425,7 +433,7 @@ class SpotifyClient(object):
             'refresh_token': response['refresh_token']
         }
 
-    def refresh_access_token(self, refresh_token):
+    def refresh_access_token(self, refresh_token: str) -> str:
         """
         Refresh application on behalf of user given a refresh token. On a successful response, will return an
         access token for the user good for the timeout period for Spotify authentication (One hour.)
@@ -445,7 +453,7 @@ class SpotifyClient(object):
 
         return response['access_token']
 
-    def get_user_profile(self, access_token):
+    def get_user_profile(self, access_token: str) -> dict:
         """
         Get data on the user from Spotify API /me endpoint
 
@@ -458,7 +466,7 @@ class SpotifyClient(object):
 
         return self._make_spotify_request('GET', url, headers=headers)
 
-    def get_attributes_for_track(self, uri):
+    def get_attributes_for_track(self, uri: str) -> dict:
         """
         Fetch song metadata for a singular track
 
@@ -483,7 +491,7 @@ class SpotifyClient(object):
             'code': uri
         }
 
-    def get_user_playlists(self, auth_code, spotify_user_id):
+    def get_user_playlists(self, auth_code: str, spotify_user_id: str) -> dict:
         """
         Get all playlists for the given Spotify user.
 
@@ -504,7 +512,7 @@ class SpotifyClient(object):
 
         return self._make_spotify_request('GET', url, headers=headers)
 
-    def create_playlist(self, auth_code, spotify_user_id, playlist_name):
+    def create_playlist(self, auth_code: str, spotify_user_id: str, playlist_name: str) -> str:
         """
         Create a playlist for the given Spotify user. Note that this creates an empty playlist,
         a subsequent API call should be made to populate the playlist with songs.
@@ -534,7 +542,7 @@ class SpotifyClient(object):
 
         return resp['id']
 
-    def add_songs_to_playlist(self, auth_code, playlist_id, songs):
+    def add_songs_to_playlist(self, auth_code: str, playlist_id: str, songs: list) -> None:
         """
         Add songs to a specified playlist
 
@@ -556,7 +564,7 @@ class SpotifyClient(object):
 
         self._make_spotify_request('POST', url, headers=headers, data=json.dumps(data))
 
-    def delete_songs_from_playlist(self, auth_code, playlist_id, songs):
+    def delete_songs_from_playlist(self, auth_code: str, playlist_id: str, songs: list) -> None:
         """
         Remove songs from a specified playlist
 
@@ -578,7 +586,7 @@ class SpotifyClient(object):
 
         self._make_spotify_request('DELETE', url, headers=headers, data=json.dumps(data))
 
-    def get_user_top_artists(self, auth_code, max_top_artists):
+    def get_user_top_artists(self, auth_code: str, max_top_artists: int) -> List[str]:
         """
         Retrieve the top artists from Spotify for a user.
 
