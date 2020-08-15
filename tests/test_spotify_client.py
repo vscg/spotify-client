@@ -73,6 +73,7 @@ class TestSpotifyClient(object):
             headers=expected_headers,
             params=None
         )
+
         assert auth == auth_code
 
     @mock.patch('requests.request')
@@ -84,6 +85,31 @@ class TestSpotifyClient(object):
         auth = spotify_client._make_auth_access_token_request()
 
         assert auth is None
+
+    @mock.patch('spotify_client.client.SpotifyClient._make_auth_access_token_request')
+    def test_get_auth_access_token_success_sets_instance_variable(self, mock_auth_request, spotify_client):
+        auth_code = 'test-auth-code'
+        mock_auth_request.return_value = auth_code
+
+        spotify_client._get_auth_access_token()
+
+        assert spotify_client.auth_token == auth_code
+
+    @mock.patch('spotify_client.client.SpotifyClient._make_auth_access_token_request')
+    def test_get_auth_access_token_does_not_call_spotify_if_cached_token_found(self, mock_auth_request, spotify_client):
+        auth_code = 'test-auth-code'
+        spotify_client.auth_token = auth_code
+
+        spotify_client._get_auth_access_token()
+
+        mock_auth_request.assert_not_called()
+
+    @mock.patch('spotify_client.client.SpotifyClient._make_auth_access_token_request')
+    def test_get_auth_access_token_success_raises_exception_for_missing_token(self, mock_auth_request, spotify_client):
+        mock_auth_request.return_value = {}
+
+        with pytest.raises(SpotifyException):
+            spotify_client._get_auth_access_token()
 
     @mock.patch('requests.request')
     @mock.patch('spotify_client.client.SpotifyClient._get_auth_access_token')

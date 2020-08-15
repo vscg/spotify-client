@@ -27,6 +27,8 @@ class SpotifyClient(object):
         self.client_id = client_id
         self.secret_key = secret_key
         self.fingerprint = identifier
+
+        self.auth_token = None
         self.seen_songs = []
 
     def _sanitize_log_data(self, data):
@@ -163,13 +165,16 @@ class SpotifyClient(object):
 
         :raises: `SpotifyException` if access token not retrieved
         """
-        access_token = self._make_auth_access_token_request()
+        if not self.auth_token:
+            access_token = self._make_auth_access_token_request()
 
-        if access_token:
-            return access_token
-        else:
-            self._log(logging.ERROR, 'Unable to retrieve access token from Spotify')
-            raise SpotifyException('Unable to retrieve Spotify access token')
+            if access_token:
+                self.auth_token = access_token
+            else:
+                self._log(logging.ERROR, 'Unable to retrieve access token from Spotify')
+                raise SpotifyException('Unable to retrieve Spotify access token')
+
+        return self.auth_token
 
     def _make_authorization_header(self):
         """
