@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="spotify-client-ndibari",
+    name="spotify-client",
     version="0.0.1",
     author="MoodyTunes",
     author_email="moody.tunes.infrastucture@gmail.com",
