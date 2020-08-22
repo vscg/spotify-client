@@ -14,7 +14,8 @@ Welcome to spotify-client's documentation!
 
 Indices and tables
 ==================
+.. automodule:: spotify_client
+   :members:
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. autoclass:: SpotifyClient
+   :members:
