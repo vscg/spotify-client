@@ -27,3 +27,46 @@ overhead of having to make a request for the access token on each request to the
 
 You can optionally pass an identifier to the constructor. This will be used in logging messages by the client to
 uniquely identify logs for the client instance.
+
+
+## Developing
+
+To work on this library, you'll first need to clone the repository:
+
+`git clone git@github.com:Moody-Tunes/spotify-client.git`
+
+Next, create a virtual environment and install the dependencies:
+
+```shell script
+virtualenv -p $(which python3) venv
+source venv/bin/activate
+(venv) pip install -r requirements.txt
+```
+
+### pre-commit
+
+We use [pre-commit](https://pre-commit.com/) for running hooks during git commits. This will help immensely with
+developer workflow by running linters, checkers, and other tools when you make commits. To install pre-commit, create a
+virtual environment and install pre-commit:
+
+```shell script
+(venv) pip install pre-commit
+```
+
+Next, install the pre-commit packages we use in our project:
+
+```shell script
+(venv) pre-commit install
+```
+
+This should run the pre-commit hooks when you make a commit to the spotify-client repository.
+
+### Running Tests
+
+We use [pytest](https://docs.pytest.org/en/stable/) for running tests. You can run the spotify-client test suite by
+invoking pytest in the virtual environment:
+
+`(venv) pytest`
+
+We also use [pytest-cov](https://pypi.org/project/pytest-cov/) for reporting test coverage of the library. This will
+be displayed after the tests have finished running and report lines in the code that have test coverage.
