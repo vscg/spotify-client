@@ -9,6 +9,7 @@ import requests
 
 from .exceptions import ClientException, SpotifyException
 
+
 logger = logging.getLogger(__name__)
 
 
