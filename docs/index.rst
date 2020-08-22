@@ -12,7 +12,7 @@ Welcome to spotify-client's documentation!
 
 
 
-Indices and tables
+SpotifyClient
 ==================
 .. automodule:: spotify_client
    :members:
