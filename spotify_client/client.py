@@ -163,7 +163,7 @@ class SpotifyClient(object):
                 exc_info=True
             )
 
-            raise SpotifyException('Received HTTP Error requesting {}'.format(url))
+            raise SpotifyException('Received HTTP Error requesting {}'.format(url)) from exc
 
         except Exception:
             self._log(logging.ERROR, 'Received unhandled exception requesting {}'.format(url), exc_info=True)

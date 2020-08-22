@@ -1,4 +1,7 @@
-class SpotifyException(Exception):
+from requests.exceptions import HTTPError
+
+
+class SpotifyException(HTTPError):
     """Exception to raise in case something bad happens during request"""
     pass
 
