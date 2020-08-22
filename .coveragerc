@@ -1,0 +1,14 @@
+[run]
+branch = True
+source =
+    spotify_client/
+omit =
+    venv/*
+    */tests/*
+    *__init__*.py
+    setup.py
+
+[report]
+fail_under = 80
+exclude_lines =
+    pragma: no cover
