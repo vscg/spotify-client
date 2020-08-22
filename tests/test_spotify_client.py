@@ -673,10 +673,7 @@ class TestSpotifyClient(object):
         mock_response.json.return_value = {'id': playlist_id}
         mock_request.return_value = mock_response
 
-        expected_headers = {
-            'Authorization': 'Bearer {}'.format(auth_code),
-            'Content-Type': 'application/json'
-        }
+        expected_headers = {'Authorization': 'Bearer {}'.format(auth_code)}
 
         expected_data = {
             'name': playlist_name,
@@ -705,10 +702,7 @@ class TestSpotifyClient(object):
         mock_response = mock.Mock()
         mock_request.return_value = mock_response
 
-        expected_headers = {
-            'Authorization': 'Bearer {}'.format(auth_code),
-            'Content-Type': 'application/json'
-        }
+        expected_headers = {'Authorization': 'Bearer {}'.format(auth_code)}
 
         expected_data = {'uris': songs}
 
@@ -732,10 +726,7 @@ class TestSpotifyClient(object):
         mock_response = mock.Mock()
         mock_request.return_value = mock_response
 
-        expected_headers = {
-            'Authorization': 'Bearer {}'.format(auth_code),
-            'Content-Type': 'application/json'
-        }
+        expected_headers = {'Authorization': 'Bearer {}'.format(auth_code)}
 
         expected_data = {'uris': songs}
 

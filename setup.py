@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="spotify-client",
-    version="0.0.2",
+    version="0.0.3",
     author="MoodyTunes",
     author_email="moody.tunes.infrastucture@gmail.com",
     description="Client for interacting with the Spotify API",

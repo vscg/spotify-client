@@ -533,10 +533,7 @@ class SpotifyClient(object):
             user_id=spotify_user_id
         )
 
-        headers = {
-            'Authorization': 'Bearer {}'.format(auth_code),
-            'Content-Type': 'application/json'
-        }
+        headers = {'Authorization': 'Bearer {}'.format(auth_code)}
 
         data = {
             'name': playlist_name,
@@ -560,10 +557,7 @@ class SpotifyClient(object):
             playlist_id=playlist_id
         )
 
-        headers = {
-            'Authorization': 'Bearer {}'.format(auth_code),
-            'Content-Type': 'application/json'
-        }
+        headers = {'Authorization': 'Bearer {}'.format(auth_code)}
 
         data = {'uris': songs}
 
@@ -582,10 +576,7 @@ class SpotifyClient(object):
             playlist_id=playlist_id
         )
 
-        headers = {
-            'Authorization': 'Bearer {}'.format(auth_code),
-            'Content-Type': 'application/json'
-        }
+        headers = {'Authorization': 'Bearer {}'.format(auth_code)}
 
         data = {'uris': songs}
 
