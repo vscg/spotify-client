@@ -1,0 +1,15 @@
+name: Publish to PyPi
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  publish:
+    name: Build and publish package
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Test
+        run: echo "Hello world"
