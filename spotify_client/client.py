@@ -1,9 +1,8 @@
 import copy
-import json
 import logging
 import random
 from base64 import b64encode
-from typing import List, Union
+from typing import List
 from urllib.parse import urlencode
 
 import requests
@@ -78,7 +77,8 @@ class SpotifyClient(object):
             method: str,
             url: str,
             params: dict = None,
-            data: Union[dict, str] = None,
+            data: dict = None,
+            json: dict = None,
             headers: dict = None
     ) -> dict:
         """
@@ -88,6 +88,7 @@ class SpotifyClient(object):
         :param url: (str) URL to send request to
         :param params: (dict) GET query params to add to URL
         :param data: (dict) POST data to send in request
+        :param json: (dict) JSON data to send in request
         :param headers: (dict) Headers to include in request
 
         :return (dict) Response content
@@ -103,6 +104,7 @@ class SpotifyClient(object):
 
         logging_params = copy.deepcopy(params)
         logging_data = copy.deepcopy(data)
+        logging_json = copy.deepcopy(json)
         logging_headers = copy.deepcopy(headers)
 
         self._log(
@@ -115,6 +117,7 @@ class SpotifyClient(object):
                 'request_method': method,
                 'params': logging_params,
                 'data': logging_data,
+                'json': logging_json,
                 'headers': logging_headers
             }
         )
@@ -125,6 +128,7 @@ class SpotifyClient(object):
                 url,
                 params=params,
                 data=data,
+                json=json,
                 headers=headers
             )
             response.raise_for_status()
@@ -148,6 +152,7 @@ class SpotifyClient(object):
                 extra={
                     'request_method': method,
                     'data': logging_data,
+                    'json': logging_json,
                     'params': logging_params,
                     'headers': logging_headers,
                     'response_code': response.status_code,
@@ -538,7 +543,7 @@ class SpotifyClient(object):
             'public': True
         }
 
-        resp = self._make_spotify_request('POST', url, headers=headers, data=json.dumps(data))
+        resp = self._make_spotify_request('POST', url, headers=headers, json=data)
 
         return resp['id']
 
@@ -562,7 +567,7 @@ class SpotifyClient(object):
 
         data = {'uris': songs}
 
-        self._make_spotify_request('POST', url, headers=headers, data=json.dumps(data))
+        self._make_spotify_request('POST', url, headers=headers, json=data)
 
     def delete_songs_from_playlist(self, auth_code: str, playlist_id: str, songs: list) -> None:
         """
@@ -584,7 +589,7 @@ class SpotifyClient(object):
 
         data = {'uris': songs}
 
-        self._make_spotify_request('DELETE', url, headers=headers, data=json.dumps(data))
+        self._make_spotify_request('DELETE', url, headers=headers, json=data)
 
     def get_user_top_artists(self, auth_code: str, max_top_artists: int) -> List[str]:
         """

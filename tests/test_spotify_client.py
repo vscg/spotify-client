@@ -1,4 +1,3 @@
-import json
 import random
 from base64 import b64encode
 from unittest import mock
@@ -71,7 +70,8 @@ class TestSpotifyClient(object):
             'https://accounts.spotify.com/api/token',
             data=expected_request_data,
             headers=expected_headers,
-            params=None
+            params=None,
+            json=None
         )
 
         assert auth == auth_code
@@ -133,7 +133,8 @@ class TestSpotifyClient(object):
             '/dummy_endpoint',
             params=dummy_params,
             data=dummy_data,
-            headers={'Authorization': 'Bearer {}'.format(auth_code)}
+            headers={'Authorization': 'Bearer {}'.format(auth_code)},
+            json=None
         )
 
         assert resp == dummy_response
@@ -163,7 +164,8 @@ class TestSpotifyClient(object):
             '/dummy_endpoint',
             params=dummy_params,
             data=dummy_data,
-            headers=dummy_headers
+            headers=dummy_headers,
+            json=None
         )
 
         assert resp == dummy_response
@@ -548,7 +550,8 @@ class TestSpotifyClient(object):
             'https://accounts.spotify.com/api/token',
             params=None,
             data=expected_request_data,
-            headers=expected_headers
+            headers=expected_headers,
+            json=None
         )
 
         assert user_tokens == expected_response_data
@@ -573,7 +576,8 @@ class TestSpotifyClient(object):
             'https://accounts.spotify.com/api/token',
             params=None,
             headers=expected_headers,
-            data=request_data
+            data=request_data,
+            json=None
         )
 
         assert access_token == expected_response_data['access_token']
@@ -597,7 +601,8 @@ class TestSpotifyClient(object):
             'https://api.spotify.com/v1/me',
             headers=expected_headers,
             params=None,
-            data=None
+            data=None,
+            json=None
         )
 
         assert profile_data == mock_profile_data
@@ -651,7 +656,8 @@ class TestSpotifyClient(object):
             'https://api.spotify.com/v1/users/{}/playlists'.format(spotify_user_id),
             params=None,
             headers=expected_headers,
-            data=None
+            data=None,
+            json=None
         )
 
         assert resp == response_data
@@ -684,7 +690,8 @@ class TestSpotifyClient(object):
             'https://api.spotify.com/v1/users/{}/playlists'.format(spotify_user_id),
             params=None,
             headers=expected_headers,
-            data=json.dumps(expected_data)
+            json=expected_data,
+            data=None
         )
 
         assert retrieved_playlist_id == playlist_id
@@ -712,7 +719,8 @@ class TestSpotifyClient(object):
             'https://api.spotify.com/v1/playlists/{}/tracks'.format(playlist_id),
             params=None,
             headers=expected_headers,
-            data=json.dumps(expected_data)
+            json=expected_data,
+            data=None
         )
 
     @mock.patch('requests.request')
@@ -738,7 +746,8 @@ class TestSpotifyClient(object):
             'https://api.spotify.com/v1/playlists/{}/tracks'.format(playlist_id),
             params=None,
             headers=expected_headers,
-            data=json.dumps(expected_data)
+            json=expected_data,
+            data=None
         )
 
     @mock.patch('requests.request')
@@ -782,7 +791,8 @@ class TestSpotifyClient(object):
             'https://api.spotify.com/v1/me/top/artists',
             params=expected_params,
             headers=expected_headers,
-            data=None
+            data=None,
+            json=None
         )
 
         assert retrieved_response == expected_response
