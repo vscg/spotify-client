@@ -14,7 +14,14 @@ logger = logging.getLogger(__name__)
 
 
 class SpotifyClient(object):
-    """Wrapper around the Spotify API"""
+    """
+    Wrapper around the Spotify API
+
+    :ivar client_id:  Spotify client ID used for authenticating with API
+    :ivar secret_key: Spotify secret key used for authenticating with API
+    :ivar identifier: Identifier to include in log messages for identifying requests
+    """
+
     BATCH_SIZE = 100
 
     API_URL = 'https://api.spotify.com/v1'

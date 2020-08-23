@@ -35,12 +35,12 @@ To work on this library, you'll first need to clone the repository:
 
 `git clone git@github.com:Moody-Tunes/spotify-client.git`
 
-Next, create a virtual environment and install the dependencies:
+Next, create a virtual environment and install the dependencies for development:
 
 ```shell script
 virtualenv -p $(which python3) venv
 source venv/bin/activate
-(venv) pip install -r requirements.txt
+(venv) pip install -r dev.txt
 ```
 
 ### pre-commit
