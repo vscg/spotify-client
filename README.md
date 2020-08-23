@@ -1,6 +1,8 @@
 # spotify-client
 Client for interacting with the Spotify API
 
+Full documentation for the library is available on [Read the Docs](https://spotify-client.readthedocs.io)
+
 ## Usage
 
 First install the package with pip:
