@@ -454,7 +454,7 @@ class SpotifyClient(object):
         Refresh application on behalf of user given a refresh token. On a successful response, will return an
         access token for the user good for the timeout period for Spotify authentication (One hour.)
 
-        :param refresh_token: (str) Refresh token for user (stored in `SpotifyUserAuth`
+        :param refresh_token: (str) Refresh token for user from Spotify
 
         :return: (str) New access token for user
         """
@@ -511,7 +511,7 @@ class SpotifyClient(object):
         """
         Get all playlists for the given Spotify user.
 
-        :param auth_code: (str) SpotifyUserAuth access_token for the given user
+        :param auth_code: (str) Access token for user from Spotify
         :param spotify_user_id: (str) Spotify username for the given user
 
         :return: (dict) Spotify response for all users playlists
@@ -533,7 +533,7 @@ class SpotifyClient(object):
         Create a playlist for the given Spotify user. Note that this creates an empty playlist,
         a subsequent API call should be made to populate the playlist with songs.
 
-        :param auth_code: (str) SpotifyUserAuth access_token for the given user
+        :param auth_code: (str) Access token for user from Spotify
         :param spotify_user_id: (str) Spotify username for the given user
         :param playlist_name: (str) Name of the playlist to be created
 
@@ -559,7 +559,7 @@ class SpotifyClient(object):
         """
         Add songs to a specified playlist
 
-        :param auth_code: (str) SpotifyUserAuth access_token for the given user
+        :param auth_code: (str) Access token for user from Spotify
         :param playlist_id: (str) Spotify playlist ID to add songs to
         :param songs: (list) Collection of Spotify track URIs to add to playlist
         """
@@ -578,7 +578,7 @@ class SpotifyClient(object):
         """
         Remove songs from a specified playlist
 
-        :param auth_code: (str) SpotifyUserAuth access_token for the given user
+        :param auth_code: (str) Access token for user from Spotify
         :param playlist_id: (str) Spotify playlist ID to remove songs from
         :param songs: (list) Collection of Spotify track URIs to remove from playlist
         """
@@ -597,7 +597,7 @@ class SpotifyClient(object):
         """
         Retrieve the top artists from Spotify for a user.
 
-        :param auth_code: (str) SpotifyUserAuth access_token for the given user
+        :param auth_code: (str) Access token for user from Spotify
         :param max_top_artists: (int) Max number of top artists to retrieve
 
         :return: (list(str)) List of top artists for the user from Spotify
