@@ -2,7 +2,7 @@ import copy
 import logging
 import random
 from base64 import b64encode
-from typing import List
+from typing import List, Union
 from urllib.parse import urlencode
 
 import requests
@@ -85,7 +85,7 @@ class SpotifyClient(object):
             method: str,
             url: str,
             params: dict = None,
-            data: dict = None,
+            data: Union[dict, bytes] = None,
             json: dict = None,
             headers: dict = None
     ) -> dict:
@@ -95,7 +95,7 @@ class SpotifyClient(object):
         :param method: (str) HTTP method to use when sending request
         :param url: (str) URL to send request to
         :param params: (dict) GET query params to add to URL
-        :param data: (dict) POST data to send in request
+        :param data: (dict or bytes) POST data to send in request
         :param json: (dict) JSON data to send in request
         :param headers: (dict) Headers to include in request
 
@@ -139,8 +139,11 @@ class SpotifyClient(object):
                 json=json,
                 headers=headers
             )
+
             response.raise_for_status()
-            response = response.json()
+
+            if response.text:
+                response = response.json()
 
             self._log(logging.INFO, 'Successful request made to {}.'.format(url))
             self._log(
@@ -451,7 +454,7 @@ class SpotifyClient(object):
         Refresh application on behalf of user given a refresh token. On a successful response, will return an
         access token for the user good for the timeout period for Spotify authentication (One hour.)
 
-        :param refresh_token: (str) Refresh token for user (stored in `SpotifyUserAuth`
+        :param refresh_token: (str) Refresh token for user from Spotify
 
         :return: (str) New access token for user
         """
@@ -508,7 +511,7 @@ class SpotifyClient(object):
         """
         Get all playlists for the given Spotify user.
 
-        :param auth_code: (str) SpotifyUserAuth access_token for the given user
+        :param auth_code: (str) Access token for user from Spotify
         :param spotify_user_id: (str) Spotify username for the given user
 
         :return: (dict) Spotify response for all users playlists
@@ -530,7 +533,7 @@ class SpotifyClient(object):
         Create a playlist for the given Spotify user. Note that this creates an empty playlist,
         a subsequent API call should be made to populate the playlist with songs.
 
-        :param auth_code: (str) SpotifyUserAuth access_token for the given user
+        :param auth_code: (str) Access token for user from Spotify
         :param spotify_user_id: (str) Spotify username for the given user
         :param playlist_name: (str) Name of the playlist to be created
 
@@ -556,7 +559,7 @@ class SpotifyClient(object):
         """
         Add songs to a specified playlist
 
-        :param auth_code: (str) SpotifyUserAuth access_token for the given user
+        :param auth_code: (str) Access token for user from Spotify
         :param playlist_id: (str) Spotify playlist ID to add songs to
         :param songs: (list) Collection of Spotify track URIs to add to playlist
         """
@@ -575,7 +578,7 @@ class SpotifyClient(object):
         """
         Remove songs from a specified playlist
 
-        :param auth_code: (str) SpotifyUserAuth access_token for the given user
+        :param auth_code: (str) Access token for user from Spotify
         :param playlist_id: (str) Spotify playlist ID to remove songs from
         :param songs: (list) Collection of Spotify track URIs to remove from playlist
         """
@@ -594,7 +597,7 @@ class SpotifyClient(object):
         """
         Retrieve the top artists from Spotify for a user.
 
-        :param auth_code: (str) SpotifyUserAuth access_token for the given user
+        :param auth_code: (str) Access token for user from Spotify
         :param max_top_artists: (int) Max number of top artists to retrieve
 
         :return: (list(str)) List of top artists for the user from Spotify
@@ -612,3 +615,26 @@ class SpotifyClient(object):
             artists.append(item['name'])
 
         return artists
+
+    def upload_image_to_playlist(self, auth_code: str, playlist_id: str, image_filepath: str) -> None:
+        """
+        Upload a custom image for a playlist. Requires ugc-image-upload and
+        playlist-modify-public/playlist-modify-private scopes from Spotify
+
+        :param auth_code: (str) Access token for user who owns the playlist
+        :param playlist_id: (str) Playlist ID from Spotify
+        :param image_filepath: (str) Path to the image file to upload
+        """
+        url = '{api_url}/playlists/{playlist_id}/images'.format(api_url=self.API_URL, playlist_id=playlist_id)
+        headers = {
+            'Authorization': 'Bearer {}'.format(auth_code),
+            'Content-Type': 'image/jpeg'
+        }
+
+        try:
+            with open(image_filepath, 'rb') as image_file:
+                image_data = b64encode(image_file.read())
+        except FileNotFoundError:
+            raise ClientException('File {} does not exist'.format(image_filepath))
+
+        self._make_spotify_request('PUT', url, data=image_data, headers=headers)
