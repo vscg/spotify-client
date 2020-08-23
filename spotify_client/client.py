@@ -2,7 +2,7 @@ import copy
 import logging
 import random
 from base64 import b64encode
-from typing import List
+from typing import List, Union
 from urllib.parse import urlencode
 
 import requests
@@ -85,7 +85,7 @@ class SpotifyClient(object):
             method: str,
             url: str,
             params: dict = None,
-            data: dict = None,
+            data: Union[dict, bytes] = None,
             json: dict = None,
             headers: dict = None
     ) -> dict:
@@ -95,7 +95,7 @@ class SpotifyClient(object):
         :param method: (str) HTTP method to use when sending request
         :param url: (str) URL to send request to
         :param params: (dict) GET query params to add to URL
-        :param data: (dict) POST data to send in request
+        :param data: (dict or bytes) POST data to send in request
         :param json: (dict) JSON data to send in request
         :param headers: (dict) Headers to include in request
 
@@ -139,8 +139,11 @@ class SpotifyClient(object):
                 json=json,
                 headers=headers
             )
+
             response.raise_for_status()
-            response = response.json()
+
+            if response.text:
+                response = response.json()
 
             self._log(logging.INFO, 'Successful request made to {}.'.format(url))
             self._log(
@@ -612,3 +615,26 @@ class SpotifyClient(object):
             artists.append(item['name'])
 
         return artists
+
+    def upload_image_to_playlist(self, auth_code: str, playlist_id: str, image_filepath: str) -> None:
+        """
+        Upload a custom image for a playlist. Requires ugc-image-upload and
+        playlist-modify-public/playlist-modify-private scopes from Spotify
+
+        :param auth_code: (str) Access token for user who owns the playlist
+        :param playlist_id: (str) Playlist ID from Spotify
+        :param image_filepath: (str) Path to the image file to upload
+        """
+        url = '{api_url}/playlists/{playlist_id}/images'.format(api_url=self.API_URL, playlist_id=playlist_id)
+        headers = {
+            'Authorization': 'Bearer {}'.format(auth_code),
+            'Content-Type': 'image/jpeg'
+        }
+
+        try:
+            with open(image_filepath, 'rb') as image_file:
+                image_data = b64encode(image_file.read())
+        except FileNotFoundError:
+            raise ClientException('File {} does not exist'.format(image_filepath))
+
+        self._make_spotify_request('PUT', url, data=image_data, headers=headers)
