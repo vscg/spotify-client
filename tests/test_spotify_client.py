@@ -788,6 +788,44 @@ class TestSpotifyClient(object):
 
         assert retrieved_response == expected_response
 
+    @mock.patch('requests.request')
+    @mock.patch('spotify_client.client.open')
+    def test_upload_playlist_image(self, mock_open, mock_request, spotify_client):
+        auth_code = 'test-spotify-auth-code'
+        playlist_id = '12345'
+        image_filepath = 'cover_file.jpg'
+        image_data = b'my-image-data'
+
+        mock_fp = mock.Mock()
+        mock_fp.read.return_value = image_data
+        mock_open.return_value.__enter__.return_value = mock_fp
+
+        expected_data = b64encode(image_data)
+        expected_headers = {
+            'Authorization': 'Bearer {}'.format(auth_code),
+            'Content-Type': 'image/jpeg'
+        }
+
+        spotify_client.upload_image_to_playlist(auth_code, playlist_id, image_filepath)
+
+        mock_request.assert_called_once_with(
+            'PUT',
+            f'https://api.spotify.com/v1/playlists/{playlist_id}/images',
+            params=None,
+            headers=expected_headers,
+            data=expected_data,
+            json=None
+        )
+
+
+    def test_upload_playlist_image_raises_error_for_file_not_found(self, spotify_client):
+        auth_code = 'test-spotify-auth-code'
+        playlist_id = '12345'
+        image_filepath = 'non_existent_file.jpg'
+
+        with pytest.raises(ClientException):
+            spotify_client.upload_image_to_playlist(auth_code, playlist_id, image_filepath)
+
     def test_get_code_from_spotify_uri(self, spotify_client):
         song_code = 'spotify:track:19p0PEnGr6XtRqCYEI8Ucc'
         expected_code = '19p0PEnGr6XtRqCYEI8Ucc'
