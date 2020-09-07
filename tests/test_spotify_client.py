@@ -4,7 +4,7 @@ from unittest import mock
 from urllib import parse
 
 import pytest
-from requests.exceptions import HTTPError
+from requests.exceptions import ConnectionError, HTTPError
 
 from spotify_client.client import SpotifyClient
 from spotify_client.exceptions import ClientException, SpotifyException
@@ -182,6 +182,22 @@ class TestSpotifyClient(object):
 
         mock_auth.return_value = auth_code
         mock_request.return_value = mock_response
+
+        with pytest.raises(SpotifyException):
+            spotify_client._make_spotify_request('GET', '/dummy_endpoint')
+
+    @mock.patch('requests.request')
+    @mock.patch('spotify_client.client.SpotifyClient._get_auth_access_token')
+    def test_make_spotify_request_raises_spotify_exception_on_connection_error(
+            self,
+            mock_auth,
+            mock_request,
+            spotify_client
+    ):
+        auth_code = 'test-auth-code'
+
+        mock_auth.return_value = auth_code
+        mock_request.side_effect = ConnectionError
 
         with pytest.raises(SpotifyException):
             spotify_client._make_spotify_request('GET', '/dummy_endpoint')
