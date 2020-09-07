@@ -175,6 +175,22 @@ class SpotifyClient(object):
 
             raise SpotifyException('Received HTTP Error requesting {}'.format(url)) from exc
 
+        except requests.exceptions.ConnectionError as exc:
+            self._log(
+                logging.ERROR,
+                'Received ConnectionError requesting {}'.format(url),
+                extra={
+                    'request_method': method,
+                    'data': logging_data,
+                    'json': logging_json,
+                    'params': logging_params,
+                    'headers': logging_headers,
+                },
+                exc_info=True
+            )
+
+            raise SpotifyException('Received ConnectionError requesting {}'.format(url)) from exc
+
         except Exception:
             self._log(logging.ERROR, 'Received unhandled exception requesting {}'.format(url), exc_info=True)
 
