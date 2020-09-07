@@ -20,7 +20,10 @@ copyright = '2020, MoodyTunes'
 author = 'MoodyTunes'
 
 # The full version, including alpha/beta/rc tags
-release = 'v1.1.0'
+with open("../VERSION", "r") as version_file:
+    version = version_file.read().strip()
+
+release = version
 
 
 # -- General configuration ---------------------------------------------------

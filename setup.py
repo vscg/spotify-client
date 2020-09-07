@@ -4,9 +4,12 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+with open("VERSION", "r") as version_file:
+    version = version_file.read().strip()
+
 setuptools.setup(
     name="spotify-client",
-    version="1.1.0",
+    version=version,
     author="MoodyTunes",
     author_email="moody.tunes.infrastucture@gmail.com",
     description="Client for interacting with the Spotify API",
