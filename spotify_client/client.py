@@ -313,12 +313,13 @@ class SpotifyClient(object):
 
         return retrieved_playlists
 
-    def get_songs_from_playlist(self, playlist: dict, num_songs: int) -> List[dict]:
+    def get_songs_from_playlist(self, playlist: dict, num_songs: int, allow_explicit: bool = False) -> List[dict]:
         """
         Get a number of songs randomly from the given playlist.
         List of songs is shuffled and the number of desired tracks are returned.
         :param playlist: (dict) Mapping of values needed to retrieve playlist tracks
         :param num_songs: (int) Number of songs to return from this playlist
+        :param allow_explicit: (bool) Flag to indicate whether or not to return explicit songs (default False)
 
         :return: (list[dict]) Song mappings from the given playlist
             - name (str): Name of the song
@@ -345,7 +346,6 @@ class SpotifyClient(object):
 
         # Process number of tracks requested, but if playlist does not have enough to return the full
         # amount we return what we get
-        # Skip tracks that have already been seen or have explicit lyrics (I want my Mom to use this site)
         for track in tracks:
             if not track['track']:
                 # Sometimes Spotify doesn't return anything for a track. Unsure why, but if the track is None
@@ -355,7 +355,12 @@ class SpotifyClient(object):
             uri = track['track']['uri']
             is_explicit = track['track']['explicit']
 
-            if uri in self.seen_songs or is_explicit:
+            # Skip song if song has already been seen
+            if uri in self.seen_songs:
+                continue
+
+            # Skip song if we shouldn't include explicit songs and song is explicit
+            if not allow_explicit and is_explicit:
                 continue
 
             payload = {
