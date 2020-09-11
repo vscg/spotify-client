@@ -1,5 +1,5 @@
 class Config(object):
-    """Config module for settint up the client"""
+    """Config module for setting up the client"""
 
     CLIENT_ID = None
     SECRET_KEY = None
@@ -14,3 +14,11 @@ class Config(object):
         """
         cls.CLIENT_ID = client_id
         cls.SECRET_KEY = secret_key
+
+    @classmethod
+    def clear_config(cls):
+        """
+        Clear the configuration set for the class
+        """
+        cls.CLIENT_ID = None
+        cls.SECRET_KEY = None
