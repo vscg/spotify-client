@@ -7,7 +7,8 @@ from urllib.parse import urlencode
 
 import requests
 
-from .exceptions import ClientException, SpotifyException
+from .config import Config
+from .exceptions import ClientException, ImproperlyConfigured, SpotifyException
 
 
 logger = logging.getLogger(__name__)
@@ -31,9 +32,16 @@ class SpotifyClient(object):
     REDACT_VALUE = '**********'
     REDACT_DATA_KEYS = ['Authorization', 'code', 'refresh_token', 'access_token']
 
-    def __init__(self, client_id: str, secret_key: str, identifier: str = 'SpotifyClient'):
-        self.client_id = client_id
-        self.secret_key = secret_key
+    def __init__(self, client_id: str = None, secret_key: str = None, identifier: str = 'SpotifyClient'):
+        self.client_id = Config.CLIENT_ID or client_id
+        self.secret_key = Config.SECRET_KEY or secret_key
+
+        if not all([self.client_id, self.secret_key]):
+            raise ImproperlyConfigured(
+                'Missing either client_id or secret_key variable. '
+                'Please set these variables either in the Config class or as instance arguments'
+            )
+
         self.fingerprint = identifier
 
         self.auth_token = None
