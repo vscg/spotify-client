@@ -7,7 +7,8 @@ import pytest
 from requests.exceptions import ConnectionError, HTTPError
 
 from spotify_client.client import SpotifyClient
-from spotify_client.exceptions import ClientException, SpotifyException
+from spotify_client.config import Config
+from spotify_client.exceptions import ClientException, ImproperlyConfigured, SpotifyException
 
 
 def generate_random_unicode_string(length):
@@ -45,6 +46,35 @@ def spotify_client():
 
 
 class TestSpotifyClient(object):
+
+    def test_auth_variables_are_read_from_config_if_configured(self):
+        test_client_id = 'my-test-client-id'
+        test_secret_key = 'my-test-secret-key'
+        Config.configure(test_client_id, test_secret_key)
+
+        client = SpotifyClient()
+
+        assert client.client_id == test_client_id
+        assert client.secret_key == test_secret_key
+
+    def test_auth_variables_are_read_from_parameters_if_passed(self):
+        test_client_id = 'my-test-client-id'
+        test_secret_key = 'my-test-secret-key'
+
+        config_client_id = 'config-client-id'
+        config_secret_key = 'config-secret-key'
+        Config.configure(config_client_id, config_secret_key)
+
+        client = SpotifyClient(test_client_id, test_secret_key)
+
+        assert client.client_id == test_client_id
+        assert client.secret_key == test_secret_key
+
+    def test_no_configuration_set_raises_error(self):
+        Config.clear_config()
+
+        with pytest.raises(ImproperlyConfigured):
+            SpotifyClient()
 
     @mock.patch('requests.request')
     def test_make_auth_access_token_request_happy_path(self, mock_request, spotify_client):
