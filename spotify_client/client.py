@@ -33,8 +33,8 @@ class SpotifyClient(object):
     REDACT_DATA_KEYS = ['Authorization', 'code', 'refresh_token', 'access_token']
 
     def __init__(self, client_id: str = None, secret_key: str = None, identifier: str = 'SpotifyClient'):
-        self.client_id = Config.CLIENT_ID or client_id
-        self.secret_key = Config.SECRET_KEY or secret_key
+        self.client_id = client_id or Config.CLIENT_ID
+        self.secret_key = secret_key or Config.SECRET_KEY
 
         if not all([self.client_id, self.secret_key]):
             raise ImproperlyConfigured(
