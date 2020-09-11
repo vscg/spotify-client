@@ -375,6 +375,47 @@ class TestSpotifyClient(object):
 
     @mock.patch('spotify_client.client.SpotifyClient._get_auth_access_token')
     @mock.patch('requests.request')
+    def test_get_songs_from_playlist_includes_explicit_song_if_specified(
+            self,
+            mock_request,
+            mock_get_auth_token,
+            spotify_client
+    ):
+        auth_code = 'test-auth-code'
+        mock_get_auth_token.return_value = auth_code
+        mock_playlist = {'user': 'two-tone-killer', 'uri': 'beats-pub'}
+
+        song_name = 'Test Song'
+        song_artist = 'Test Artist'
+
+        mock_response = mock.Mock()
+        mock_response.json.return_value = {
+            'tracks': {
+                'items': [{
+                    'track': {
+                        'name': 'Glazed',
+                        'uri': 'song-uri',
+                        'explicit': True,
+                        'artists': [{
+                            'name': 'J Dilla'
+                        }]
+                    }
+                }]
+            }
+        }
+
+        mock_request.return_value = mock_response
+
+        expected_return = {
+            'name': 'Glazed',
+            'artist': 'J Dilla',
+            'code': 'song-uri'
+        }
+        actual_return = spotify_client.get_songs_from_playlist(mock_playlist, 1, allow_explicit=True)
+        assert expected_return == actual_return[0]
+
+    @mock.patch('spotify_client.client.SpotifyClient._get_auth_access_token')
+    @mock.patch('requests.request')
     def test_get_songs_from_playlist_handles_empty_tracks(self, mock_request, mock_get_auth_token, spotify_client):
         auth_code = 'test-auth-code'
         mock_get_auth_token.return_value = auth_code
