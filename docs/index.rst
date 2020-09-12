@@ -10,12 +10,15 @@ Welcome to spotify-client's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-
-
-SpotifyClient
-==================
 .. automodule:: spotify_client
    :members:
 
+SpotifyClient
+==================
 .. autoclass:: SpotifyClient
+   :members:
+
+Config
+==================
+.. autoclass:: Config
    :members:
