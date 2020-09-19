@@ -939,7 +939,6 @@ class TestSpotifyClient(object):
             json=None
         )
 
-
     def test_upload_playlist_image_raises_error_for_file_not_found(self, spotify_client):
         auth_code = 'test-spotify-auth-code'
         playlist_id = '12345'
@@ -947,6 +946,101 @@ class TestSpotifyClient(object):
 
         with pytest.raises(ClientException):
             spotify_client.upload_image_to_playlist(auth_code, playlist_id, image_filepath)
+
+    @mock.patch('spotify_client.client.SpotifyClient._get_auth_access_token')
+    @mock.patch('requests.request')
+    def test_search(self, mock_request, mock_get_auth_token, spotify_client):
+        mock_get_auth_token.return_value = 'test-auth-code'
+        query = 'genre:"hip hop"'
+        search_types = ['track', 'artist']
+        limit = 10
+
+        expected_headers = {'Authorization': 'Bearer test-auth-code'}
+        expected_params = {
+            'q': query,
+            'type': 'track,artist',
+            'limit': limit,
+            'market': 'US'
+        }
+
+        spotify_client.search(query, search_types, limit)
+
+        mock_request.assert_called_once_with(
+            'GET',
+            'https://api.spotify.com/v1/search',
+            headers=expected_headers,
+            params=expected_params,
+            data=None,
+            json=None
+        )
+
+    @mock.patch('spotify_client.client.SpotifyClient._get_auth_access_token')
+    @mock.patch('requests.request')
+    def test_search_handles_single_type_passed(self, mock_request, mock_get_auth_token, spotify_client):
+        mock_get_auth_token.return_value = 'test-auth-code'
+        query = 'genre:"hip hop"'
+        search_types = 'track'
+        limit = 10
+
+        expected_headers = {'Authorization': 'Bearer test-auth-code'}
+        expected_params = {
+            'q': query,
+            'type': 'track',
+            'limit': limit,
+            'market': 'US'
+        }
+
+        spotify_client.search(query, search_types, limit)
+
+        mock_request.assert_called_once_with(
+            'GET',
+            'https://api.spotify.com/v1/search',
+            headers=expected_headers,
+            params=expected_params,
+            data=None,
+            json=None
+        )
+
+    @mock.patch('spotify_client.client.SpotifyClient._get_auth_access_token')
+    @mock.patch('requests.request')
+    def test_search_uses_default_limit_if_none_passed(self, mock_request, mock_get_auth_token, spotify_client):
+        mock_get_auth_token.return_value = 'test-auth-code'
+        query = 'genre:"hip hop"'
+        search_types = 'track'
+
+        expected_headers = {'Authorization': 'Bearer test-auth-code'}
+        expected_params = {
+            'q': query,
+            'type': 'track',
+            'limit': spotify_client.MAX_SEARCH_SIZE,
+            'market': 'US'
+        }
+
+        spotify_client.search(query, search_types)
+
+        mock_request.assert_called_once_with(
+            'GET',
+            'https://api.spotify.com/v1/search',
+            headers=expected_headers,
+            params=expected_params,
+            data=None,
+            json=None
+        )
+
+    def test_search_raises_client_exception_if_invalid_limit_passed(self, spotify_client):
+        query = 'genre:"hip hop"'
+        search_types = 'track'
+        limit = 100
+
+        with pytest.raises(ClientException):
+            spotify_client.search(query, search_types, limit)
+
+    def test_search_raises_client_exception_if_invalid_search_type_passed(self, spotify_client):
+        query = 'genre:"hip hop"'
+        search_types = 'invalid-type'
+
+        with pytest.raises(ClientException):
+            spotify_client.search(query, search_types)
 
     def test_get_code_from_spotify_uri(self, spotify_client):
         song_code = 'spotify:track:19p0PEnGr6XtRqCYEI8Ucc'
