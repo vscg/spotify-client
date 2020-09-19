@@ -24,6 +24,8 @@ class SpotifyClient(object):
     """
 
     BATCH_SIZE = 100
+    MAX_SEARCH_SIZE = 50
+    SEARCH_TYPE_OPTIONS = ['album', 'artist', 'playlist', 'track', 'show', 'episode']
 
     API_URL = 'https://api.spotify.com/v1'
     AUTH_URL = 'https://accounts.spotify.com/api/token'
@@ -667,3 +669,36 @@ class SpotifyClient(object):
             raise ClientException('File {} does not exist'.format(image_filepath))
 
         self._make_spotify_request('PUT', url, data=image_data, headers=headers)
+
+    def search(self, query: str, search_types: Union[str, List], limit: int = None) -> dict:
+        """
+        Query the API for resources that match a given query.
+
+        :param query: (str) Query to send to the endpoint
+        :param search_types: (str | list) Single or multiple item types to search across. Must be one of
+        [album, artist, playlist, track, show, episode]
+        :param limit: (int) Maximum number of resources to return. Default to max of 50 resources
+
+        :return: (dict) Response from API.
+        See https://developer.spotify.com/documentation/web-api/reference/search/search/#fields-reference for full
+        details.
+        """
+        url = '{api_url}/search'.format(api_url=self.API_URL)
+        limit = limit or self.MAX_SEARCH_SIZE
+
+        if not isinstance(search_types, list):
+            search_types = [search_types]
+
+        # Validate that the search_types parameters are valid
+        for _type in search_types:
+            if _type not in self.SEARCH_TYPE_OPTIONS:
+                raise ClientException(f'{_type} is not a valid search type. Options are {self.SEARCH_TYPE_OPTIONS}')
+
+        params = {
+            'q': query,
+            'type': ','.join(search_types),
+            'limit': limit,
+            'market': 'US'
+        }
+
+        return self._make_spotify_request('GET', url, params=params)
