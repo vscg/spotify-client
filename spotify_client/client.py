@@ -686,6 +686,9 @@ class SpotifyClient(object):
         url = '{api_url}/search'.format(api_url=self.API_URL)
         limit = limit or self.MAX_SEARCH_SIZE
 
+        if limit > self.MAX_SEARCH_SIZE:
+            raise ClientException(f'Invalid limit. Must be less than {self.MAX_SEARCH_SIZE}')
+
         if not isinstance(search_types, list):
             search_types = [search_types]
 
