@@ -705,3 +705,30 @@ class SpotifyClient(object):
         }
 
         return self._make_spotify_request('GET', url, params=params)
+
+    def get_all_songs_from_user_playlist(self, auth_code: str, playlist_id: str) -> List[str]:
+        """
+        Get all the song URIs from the playlist for the given user
+
+        :param auth_code: (str) Access token for user who owns the playlist
+        :param playlist_id: (str) Playlist ID from Spotify
+
+        :return: List of Spotify URIs for songs in playlist
+        """
+        song_uris = []
+
+        url = f'{self.API_URL}/playlists/{playlist_id}/tracks'
+        headers = {'Authorization': f'Bearer {auth_code}'}
+        params = {'fields': 'items(track(uri)),next'}
+
+        while url:
+            response = self._make_spotify_request('GET', url, headers=headers, params=params)
+
+            tracks = response['items']
+            for track in tracks:
+                if track['track'] and track['track']['uri'] not in song_uris:
+                    song_uris.append(track['track']['uri'])
+
+            url = response['next']
+
+        return song_uris
