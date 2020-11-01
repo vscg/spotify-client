@@ -1027,6 +1027,114 @@ class TestSpotifyClient(object):
             json=None
         )
 
+    @mock.patch('requests.request')
+    def test_get_all_songs_from_playlist_with_no_pagination(self, mock_request, spotify_client):
+        access_token = 'mock:access:token'
+        playlist_id = 'test:playlist:id'
+
+        response_data = {
+            'items': [
+                {"track": {"uri": "spotify:track:123456"}},
+                {"track": {"uri": "spotify:track:234567"}},
+                {"track": {"uri": "spotify:track:345678"}},
+                {"track": {"uri": "spotify:track:456789"}},
+            ],
+            'next': None
+        }
+
+        expected_headers = {'Authorization': f'Bearer {access_token}'}
+        expected_params = {'fields': 'items(track(uri)),next'}
+        expected_response = [
+            'spotify:track:123456',
+            'spotify:track:234567',
+            'spotify:track:345678',
+            'spotify:track:456789'
+        ]
+
+        mock_response = mock.Mock()
+        mock_response.json.return_value = response_data
+        mock_request.return_value = mock_response
+
+        resp = spotify_client.get_all_songs_from_user_playlist(access_token, playlist_id)
+
+        assert resp == expected_response
+        mock_request.assert_called_once_with(
+            'GET',
+            f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks',
+            headers=expected_headers,
+            params=expected_params,
+            data=None,
+            json=None
+        )
+
+    @mock.patch('requests.request')
+    def test_get_all_songs_from_playlist_with_pagination(self, mock_request, spotify_client):
+        access_token = 'mock:access:token'
+        playlist_id = 'test:playlist:id'
+
+        response_data = [
+            {
+                'items': [
+                    {"track": {"uri": "spotify:track:123456"}},
+                    {"track": {"uri": "spotify:track:234567"}},
+                    {"track": {"uri": "spotify:track:345678"}},
+                    {"track": {"uri": "spotify:track:456789"}},
+                ],
+                'next': f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?page=2'
+            },
+            {
+                'items': [
+                    {"track": {"uri": "spotify:track:098765"}},
+                    {"track": {"uri": "spotify:track:987654"}},
+                    {"track": {"uri": "spotify:track:876543"}},
+                    {"track": {"uri": "spotify:track:765432"}},
+                ],
+                'next': None
+            },
+        ]
+
+        expected_headers = {'Authorization': f'Bearer {access_token}'}
+        expected_params = {'fields': 'items(track(uri)),next'}
+        expected_response = [
+            'spotify:track:123456',
+            'spotify:track:234567',
+            'spotify:track:345678',
+            'spotify:track:456789',
+            "spotify:track:098765",
+            "spotify:track:987654",
+            "spotify:track:876543",
+            "spotify:track:765432",
+        ]
+
+        mock_response = mock.Mock()
+        mock_response.json.side_effect = response_data
+        mock_request.return_value = mock_response
+
+        resp = spotify_client.get_all_songs_from_user_playlist(access_token, playlist_id)
+
+        assert resp == expected_response
+
+        expected_calls = [
+            mock.call(
+                'GET',
+                f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks',
+                headers=expected_headers,
+                params=expected_params,
+                data=None,
+                json=None
+            ),
+            mock.call(
+                'GET',
+                f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?page=2',
+                headers=expected_headers,
+                params=expected_params,
+                data=None,
+                json=None
+            )
+        ]
+
+        mock_request.assert_has_calls(expected_calls, any_order=True)
+
     def test_search_raises_client_exception_if_invalid_limit_passed(self, spotify_client):
         query = 'genre:"hip hop"'
         search_types = 'track'
