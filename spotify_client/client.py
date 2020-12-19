@@ -2,6 +2,7 @@ import copy
 import logging
 import random
 from base64 import b64encode
+from datetime import datetime, timedelta
 from typing import List, Union
 from urllib.parse import urlencode
 
@@ -47,6 +48,7 @@ class SpotifyClient(object):
         self.fingerprint = identifier
 
         self.auth_token = None
+        self.auth_token_last_refreshed = None
         self.seen_songs = []
 
     def _sanitize_log_data(self, data: dict) -> dict:
@@ -208,18 +210,18 @@ class SpotifyClient(object):
 
     def _get_auth_access_token(self) -> str:
         """
-        Return the access token we need to make requests to Spotify. Will either hit the cache for the key,
-        or make a request to Spotify if the token in the cache is invalid
+        Return the access token we need to make requests to Spotify.
 
         :return: (str) Key needed to authenticate with Spotify API
 
         :raises: `SpotifyException` if access token not retrieved
         """
-        if not self.auth_token:
+        if not self.auth_token_last_refreshed or self.auth_token_last_refreshed < datetime.now() - timedelta(hours=1):
             access_token = self._make_auth_access_token_request()
 
             if access_token:
                 self.auth_token = access_token
+                self.auth_token_last_refreshed = datetime.now()
             else:
                 self._log(logging.ERROR, 'Unable to retrieve access token from Spotify')
                 raise SpotifyException('Unable to retrieve Spotify access token')

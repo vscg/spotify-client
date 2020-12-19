@@ -1,5 +1,6 @@
 import random
 from base64 import b64encode
+from datetime import datetime, timedelta
 from unittest import mock
 from urllib import parse
 
@@ -129,10 +130,21 @@ class TestSpotifyClient(object):
     def test_get_auth_access_token_does_not_call_spotify_if_cached_token_found(self, mock_auth_request, spotify_client):
         auth_code = 'test-auth-code'
         spotify_client.auth_token = auth_code
+        spotify_client.auth_token_last_refreshed = datetime.now()
 
         spotify_client._get_auth_access_token()
 
         mock_auth_request.assert_not_called()
+
+    @mock.patch('spotify_client.client.SpotifyClient._make_auth_access_token_request')
+    def test_get_auth_access_token_calls_spotify_if_cached_token_is_expired(self, mock_auth_request, spotify_client):
+        auth_code = 'test-auth-code'
+        spotify_client.auth_token = auth_code
+        spotify_client.auth_token_last_refreshed = datetime.now() - timedelta(hours=1)
+
+        spotify_client._get_auth_access_token()
+
+        mock_auth_request.assert_called_once()
 
     @mock.patch('spotify_client.client.SpotifyClient._make_auth_access_token_request')
     def test_get_auth_access_token_success_raises_exception_for_missing_token(self, mock_auth_request, spotify_client):
