@@ -26,6 +26,7 @@ class SpotifyClient(object):
 
     BATCH_SIZE = 100
     MAX_SEARCH_SIZE = 50
+    DEFAULT_RECENTLY_PLAYED_TRACKS_LIMIT = 30
     SEARCH_TYPE_OPTIONS = ['album', 'artist', 'playlist', 'track', 'show', 'episode']
 
     API_URL = 'https://api.spotify.com/v1'
@@ -734,3 +735,23 @@ class SpotifyClient(object):
             url = response['next']
 
         return song_uris
+
+    def get_recently_played_tracks_for_user(self, auth_code: str, limit: int = None) -> dict:
+        """
+        Retrieve the top `limit` tracks that a user has listened to on Spotify
+        - Requires the `user-read-recently-played` Spotify OAuth scope
+
+        :param auth_code: (str) Access token for user from Spotify
+        :param limit: (int) Number of tracks to return (default to self.DEFAULT_RECENTLY_PLAYED_TRACKS_LIMIT)
+
+        :return: (dict) Response of play history objects from Spotify API
+        """
+        headers = {'Authorization': f'Bearer {auth_code}'}
+        params = {'limit': limit or self.DEFAULT_RECENTLY_PLAYED_TRACKS_LIMIT}
+
+        return self._make_spotify_request(
+            'GET',
+            f'{self.API_URL}/me/player/recently-played',
+            headers=headers,
+            params=params
+        )

@@ -1147,6 +1147,43 @@ class TestSpotifyClient(object):
 
         mock_request.assert_has_calls(expected_calls, any_order=True)
 
+    @mock.patch('requests.request')
+    def test_get_recently_played_tracks_for_user(self, mock_request, spotify_client):
+        auth_code = 'test-user-auth-code'
+
+        expected_headers = {'Authorization': f'Bearer {auth_code}'}
+        expected_params = {'limit': spotify_client.DEFAULT_RECENTLY_PLAYED_TRACKS_LIMIT}
+
+        spotify_client.get_recently_played_tracks_for_user(auth_code)
+
+        mock_request.assert_called_once_with(
+            'GET',
+            'https://api.spotify.com/v1/me/player/recently-played',
+            headers=expected_headers,
+            params=expected_params,
+            data=None,
+            json=None
+        )
+
+    @mock.patch('requests.request')
+    def test_get_recently_played_tracks_for_user_with_limit(self, mock_request, spotify_client):
+        auth_code = 'test-user-auth-code'
+        limit = 5
+
+        expected_headers = {'Authorization': f'Bearer {auth_code}'}
+        expected_params = {'limit': limit}
+
+        spotify_client.get_recently_played_tracks_for_user(auth_code, limit=limit)
+
+        mock_request.assert_called_once_with(
+            'GET',
+            'https://api.spotify.com/v1/me/player/recently-played',
+            headers=expected_headers,
+            params=expected_params,
+            data=None,
+            json=None
+        )
+
     def test_search_raises_client_exception_if_invalid_limit_passed(self, spotify_client):
         query = 'genre:"hip hop"'
         search_types = 'track'
