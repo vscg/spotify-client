@@ -703,8 +703,7 @@ class SpotifyClient(object):
         params = {
             'q': query,
             'type': ','.join(search_types),
-            'limit': limit,
-            'market': 'US'
+            'limit': limit
         }
 
         return self._make_spotify_request('GET', url, params=params)
@@ -755,3 +754,79 @@ class SpotifyClient(object):
             headers=headers,
             params=params
         )
+        
+    def getAllAlbum(self, auth_code: str, limit: int, offset: int) -> dict:
+        url = '{api_url}/me/albums'.format(api_url=self.API_URL)
+        
+        if limit > 50:
+            raise ClientException(f'Invalid limit. Must be less than 50')
+            
+        headers = {'Authorization': 'Bearer {}'.format(auth_code)}
+        
+        params = {
+            'limit': limit,
+            'offset': offset
+            #,'market': 'US'
+        }
+
+        return self._make_spotify_request('GET', url, headers=headers, params=params)
+        
+    def addAlbum(self, ids: str, auth_code: str) -> dict:
+        url = '{api_url}/me/albums'.format(api_url=self.API_URL)
+        
+        headers = {'Authorization': 'Bearer {}'.format(auth_code)}
+
+        params = {
+            'ids': ids
+        }
+
+        return self._make_spotify_request('PUT', url, params=params, headers=headers)
+        
+    def getAlbum(self, query: str) -> dict:
+        url = '{api_url}/albums'.format(api_url=self.API_URL)
+        limit = self.MAX_SEARCH_SIZE
+        
+        if limit > self.MAX_SEARCH_SIZE:
+            raise ClientException(f'Invalid limit. Must be less than {self.MAX_SEARCH_SIZE}')
+
+        search_types = ['album']
+
+        # Validate that the search_types parameters are valid
+        for _type in search_types:
+            if _type not in self.SEARCH_TYPE_OPTIONS:
+                raise ClientException(f'{_type} is not a valid search type. Options are {self.SEARCH_TYPE_OPTIONS}')
+
+        params = {
+            'ids': query,
+            'type': ','.join(search_types),
+            'limit': limit,
+            'market': 'US'
+        }
+
+        return self._make_spotify_request('GET', url, params=params)
+        
+    def getPlaylist(self, playlist_id : str, limit: int, offset: int, fields:str) -> dict:
+        url = '{api_url}/playlists/{pid}/tracks'.format(api_url=self.API_URL, pid=playlist_id)
+        
+        if limit > 100:
+            raise ClientException(f'Invalid limit. Must be less than 100')
+
+        params = {
+            'fields': fields,
+            'limit': limit,
+            'offset': offset
+            #,'market': 'US'
+        }
+
+        return self._make_spotify_request('GET', url, params=params)
+        
+    def addToPlaylist(self, playlist_id : str, uris: str, auth_code: str) -> dict:
+        url = '{api_url}/playlists/{pid}/tracks'.format(api_url=self.API_URL, pid=playlist_id)
+        
+        headers = {'Authorization': 'Bearer {}'.format(auth_code)}
+        
+        params = {
+            'uris': uris,
+        }
+
+        return self._make_spotify_request('POST', url, params=params, headers=headers)
