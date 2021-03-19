@@ -782,6 +782,17 @@ class SpotifyClient(object):
 
         return self._make_spotify_request('PUT', url, params=params, headers=headers)
         
+    def removeAlbum(self, ids: str, auth_code: str) -> dict:
+        url = '{api_url}/me/albums'.format(api_url=self.API_URL)
+
+        headers = {'Authorization': 'Bearer {}'.format(auth_code)}
+
+        params = {
+            'ids': ids
+        }
+
+        return self._make_spotify_request('DELETE', url, params=params, headers=headers)
+
     def getAlbum(self, query: str) -> dict:
         url = '{api_url}/albums'.format(api_url=self.API_URL)
         limit = self.MAX_SEARCH_SIZE
